@@ -69,9 +69,6 @@ func (h *AuthHandler) HandleAuthenticate(c fiber.Ctx) error {
 		return err
 	}
 
-	// 2. مقایسه پسورد هش شده
-	// user.EncryptedPassword: چیزی که در دیتابیس هست (Hash)
-	// params.Password: چیزی که کاربر وارد کرده (Plaintext)
 	err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPassword), []byte(params.Password))
 	if err != nil {
 		fmt.Println("Password mismatch error:", err) // جهت دیباگ
@@ -85,10 +82,6 @@ func (h *AuthHandler) HandleAuthenticate(c fiber.Ctx) error {
 		Token: token,
 	})
 }
-
-// ---------------------------------------------------------
-// توابع کمکی
-// ---------------------------------------------------------
 
 func invalidCredentials(c fiber.Ctx) error {
 	return c.Status(http.StatusBadRequest).JSON(genericResp{

@@ -69,11 +69,10 @@ func AddUser(store *db.Store, fn, ln string, admin bool) *types.User {
 	}
 
 	user := types.User{
-		FirstName: fn,
-		LastName:  ln,
-		Email:     fmt.Sprintf("%s@%s.com", fn, ln),
-		IsAdmin:   admin,
-		// 3. ذخیره هش در دیتابیس
+		FirstName:         fn,
+		LastName:          ln,
+		Email:             fmt.Sprintf("%s@%s.com", fn, ln),
+		IsAdmin:           admin,
 		EncryptedPassword: string(hashedPassword),
 		CreatedAt:         time.Now(),
 	}
