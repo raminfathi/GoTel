@@ -1,0 +1,87 @@
+package types
+
+import (
+	"fmt"
+	"regexp"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	bcrypetCost     = 12
+	minFirstNameLen = 2
+	minLastNameLen  = 2
+	minPasswordLen  = 7
+)
+
+type CreateUserParams struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
+
+func (params CreateUserParams) Validate() map[string]string {
+	errors := map[string]string{}
+	if len(params.FirstName) < minFirstNameLen {
+		errors["firstNami"] = fmt.Sprintf("firsName lenth should be at least %d characters", minFirstNameLen)
+	}
+	if len(params.LastName) < minLastNameLen {
+		errors["lastName"] = fmt.Sprintf("lastName lenth should be at least %d characters", minLastNameLen)
+
+	}
+	if len(params.Password) < minPasswordLen {
+		errors["password"] = fmt.Sprintf("password lenth should be at least %d characters", minPasswordLen)
+	}
+	if !isEmailValid(params.Email) {
+		errors["email"] = fmt.Sprintf("email %s is invalid", params.Email)
+	}
+	return errors
+}
+func IsValidPassword(encpw, pw string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(encpw), []byte(pw)) == nil
+}
+
+func isEmailValid(e string) bool {
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	return emailRegex.MatchString(e)
+}
+
+type User struct {
+	ID               bson.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	FirstName        string        `bson:"firstName" json:"firstName"`
+	LastName         string        `bson:"lastName" json:"lastName"`
+	Email            string        `bson:"email" json:"email"`
+	EncrypedPassword string        `bson:"EncrypedPassword" json:"-"`
+	IsAdmin          bool          `bson:"isAdmin" json:"isAdmin"`
+}
+
+func NewUserFromParams(params CreateUserParams) (*User, error) {
+	encpw, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypetCost)
+	if err != nil {
+		return nil, err
+	}
+	return &User{
+		FirstName:        params.FirstName,
+		LastName:         params.LastName,
+		Email:            params.Email,
+		EncrypedPassword: string(encpw),
+	}, nil
+}
+
+type UpdateUserParams struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+func (p UpdateUserParams) ToBSON() bson.M {
+	m := bson.M{}
+	if len(p.FirstName) > 0 {
+		m["firstName"] = p.FirstName
+	}
+	if len(p.LastName) > 0 {
+		m["lastName"] = p.LastName
+	}
+	return m
+}

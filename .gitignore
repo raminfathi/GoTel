@@ -1,0 +1,33 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (removed in newer go versions but good to keep)
+vendor/
+
+# Go workspace file
+go.work
+
+# Environment variables
+.env
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Binaries
+bin/
+main
+main.exe
+
+
+yaak
