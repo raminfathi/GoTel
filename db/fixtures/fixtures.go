@@ -27,12 +27,12 @@ func AddBooking(store *db.Store, uid, rid bson.ObjectID, from, till time.Time) *
 	return insertedBooking
 }
 
-func AddRoom(store *db.Store, size string, ss bool, price float64, hid bson.ObjectID) *types.Room {
+func AddRoom(store *db.Store, roomType types.RoomType, basePrice float64, hid bson.ObjectID) *types.Room {
 	room := &types.Room{
-		Size:    size,
-		SeaSide: ss,
-		Price:   price,
-		HotelID: hid,
+		Type:      roomType,
+		BasePrice: basePrice,
+		Price:     basePrice,
+		HotelID:   hid,
 	}
 	insertedRoom, err := store.Room.InsertRoom(context.Background(), room)
 	if err != nil {

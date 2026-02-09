@@ -17,7 +17,6 @@ func TestAuthenticateWithWrongPassword(t *testing.T) {
 	tdb := setup(t)
 	defer tdb.teardown(t)
 
-	// یوزر ساخته میشه: ایمیل James@Foo.com و پسورد James_Foo
 	fixtures.AddUser(tdb.Store, "James", "Foo", false)
 
 	app := fiber.New()
@@ -26,7 +25,7 @@ func TestAuthenticateWithWrongPassword(t *testing.T) {
 
 	params := AuthParams{
 		Email:    "James@Foo.com",
-		Password: "password_kamelan_ghalat", // <--- این باید غلط باشه!
+		Password: "password_kamelan_ghalat",
 	}
 	b, _ := json.Marshal(params)
 	req := httptest.NewRequest("POST", "/auth", bytes.NewReader(b))
@@ -37,7 +36,6 @@ func TestAuthenticateWithWrongPassword(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// انتظار داریم ۴۰۰ بگیریم
 	if resp.StatusCode != http.StatusBadRequest {
 		t.Fatalf("expected 400 but got %d", resp.StatusCode)
 	}
@@ -55,7 +53,7 @@ func TestAuthenticateSuccess(t *testing.T) {
 
 	params := AuthParams{
 		Email:    "James@Foo.com",
-		Password: "James_Foo", // <--- این باید درست باشه
+		Password: "James_Foo",
 	}
 	b, _ := json.Marshal(params)
 	req := httptest.NewRequest("POST", "/auth", bytes.NewReader(b))
@@ -74,9 +72,7 @@ func TestAuthenticateSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// پاک کردن پسورد هش شده برای مقایسه دقیق
 	insertedUser.EncryptedPassword = ""
-	// هندل کردن اختلاف زمان جزئی (اختیاری)
 	insertedUser.CreatedAt = authResp.User.CreatedAt
 
 	if !reflect.DeepEqual(insertedUser, authResp.User) {

@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/raminfathi/GoTel/types"
@@ -31,6 +32,8 @@ func NewMongoHotelStore(client *mongo.Client) *MongoHotelStore {
 	}
 }
 func (s *MongoHotelStore) GetHotelByID(ctx context.Context, id string) (*types.Hotel, error) {
+	fmt.Println(id)
+
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -41,7 +44,7 @@ func (s *MongoHotelStore) GetHotelByID(ctx context.Context, id string) (*types.H
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(hotel)
 	return hotel, nil
 }
 

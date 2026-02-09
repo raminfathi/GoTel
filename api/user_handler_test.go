@@ -33,9 +33,7 @@ func TestPostUser(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// fmt.Println(resp.Status)
-	// bb, _ := io.ReadAll(resp.Body)
-	// fmt.Println(string(bb))
+
 	var user types.User
 	json.NewDecoder(resp.Body).Decode(&user)
 	if len(user.ID) == 0 {

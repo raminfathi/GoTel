@@ -24,12 +24,7 @@ func (tdb *testdb) teardown(t *testing.T) {
 	if err := tdb.client.Database(dbname).Drop(context.TODO()); err != nil {
 		t.Fatal(err)
 	}
-	// if err := tdb.UserStore.Drop(context.TODO()); err != nil {
-	// 	log.Fatal(err)
-	// }
-	// if err := tdb.client.Disconnect(context.TODO()); err != nil {
-	// 	log.Fatal(err)
-	// }
+
 
 }
 func setup(t *testing.T) *testdb {

@@ -11,6 +11,7 @@ import (
 	"github.com/raminfathi/GoTel/api"
 	"github.com/raminfathi/GoTel/db"
 	"github.com/raminfathi/GoTel/db/fixtures"
+	"github.com/raminfathi/GoTel/types"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -60,7 +61,7 @@ func main() {
 	admin := fixtures.AddUser(store, "admin", "admin", true)
 	fmt.Println("admin ->", api.CreateTokenFromUser(admin))
 	hotel := fixtures.AddHotel(store, "some hotel", "bermuda", 5, nil)
-	room := fixtures.AddRoom(store, "large", true, 88.44, hotel.ID)
+	room := fixtures.AddRoom(store, types.DoubleRoomType, 88.9, hotel.ID)
 	booking := fixtures.AddBooking(store, user.ID, room.ID, time.Now(), time.Now().AddDate(0, 0, 5))
 	fmt.Println("booking ->", booking.ID)
 

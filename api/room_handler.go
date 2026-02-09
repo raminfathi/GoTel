@@ -1,10 +1,8 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/raminfathi/GoTel/db"
 	"github.com/raminfathi/GoTel/types"
@@ -12,23 +10,6 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
-
-type BookRoomParams struct {
-	FromDate   time.Time `json:"fromDate"`
-	TillDate   time.Time `json:"tillDate"`
-	NumPersons int       `json:"numPersons"`
-}
-
-func (p *BookRoomParams) validate() error {
-	if p.FromDate.IsZero() || p.TillDate.IsZero() {
-		return fmt.Errorf("dates cannot be empty")
-	}
-	now := time.Now()
-	if now.After(p.FromDate) || now.After(p.TillDate) {
-		return fmt.Errorf("cannot book a room in the past")
-	}
-	return nil
-}
 
 type RoomHandler struct {
 	store *db.Store
@@ -47,31 +28,26 @@ func (h *RoomHandler) HandleGetRooms(c fiber.Ctx) error {
 	return c.JSON(rooms)
 }
 func (h *RoomHandler) HandleBookRoom(c fiber.Ctx) error {
-	var params BookRoomParams
+	var params types.BookRoomParams
 	if err := c.Bind().Body(&params); err != nil {
 		return err
 	}
-	if err := params.validate(); err != nil {
-		return err
+	if errors := params.Validate(); len(errors) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 	roomID, err := bson.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
-		return err
+		return types.ErrInvalidID()
 	}
 	userCtx := c.Locals("user")
-	// if !ok {
-	// 	return c.Status(http.StatusInternalServerError).JSON(genericResp{
-	// 		Type: "error",
-	// 		Msg:  "internal server error",
-	// 	})
-	// }
+
 	user, ok := userCtx.(*types.User)
 	if !ok {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "internal server error (user not found in context)",
 		})
 	}
-	ok, err = h.isRoomAvailableForBooking(c.Context(), roomID, params)
+	ok, err = h.store.Booking.IsRoomAvailable(c.Context(), roomID, params.FromDate, params.TillDate)
 	if err != nil {
 		return err
 	}
@@ -94,27 +70,4 @@ func (h *RoomHandler) HandleBookRoom(c fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(inserted)
-}
-
-func (h *RoomHandler) isRoomAvailableForBooking(ctx context.Context, roomID bson.ObjectID, params BookRoomParams) (bool, error) {
-
-	where := bson.M{
-		"roomID": roomID,
-		"fromDate": bson.M{
-			"$lt": params.TillDate,
-		},
-		"tillDate": bson.M{
-			"$gt": params.FromDate,
-		},
-	}
-
-	fmt.Printf("Searching for RoomID: %s\n", roomID.Hex())
-	fmt.Printf("Filter: %+v\n", where)
-	bookings, err := h.store.Booking.GetBookings(ctx, where)
-	if err != nil {
-		return false, err
-	}
-	ok := len(bookings) == 0
-	return ok, nil
-
 }

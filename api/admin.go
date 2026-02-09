@@ -9,10 +9,10 @@ import (
 func AdminAuth(c fiber.Ctx) error {
 	user, ok := c.Locals("user").(*types.User)
 	if !ok {
-		return ErrUnAuthorized()
+		return types.ErrUnAuthorized()
 	}
 	if !user.IsAdmin {
-		return ErrUnAuthorized()
+		return types.ErrUnAuthorized()
 
 	}
 	return c.Next()

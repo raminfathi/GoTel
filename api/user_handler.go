@@ -23,12 +23,9 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 func (h *UserHandler) HandlePutUser(c fiber.Ctx) error {
 	var params types.UpdateUserParams
 	userId := c.Params("id")
-	// oid, err := bson.ObjectIDFromHex(userId)
-	// if err != nil {
-	// 	return err
-	// }
+
 	if err := c.Bind().Body(&params); err != nil {
-		return ErrBadRequest()
+		return types.ErrBadRequest()
 	}
 	filter := db.Map{"_id": userId}
 	if err := h.userStore.UpdateUser(c.Context(), filter, params); err != nil {
@@ -42,7 +39,7 @@ func (h *UserHandler) HandleDeleteUser(c fiber.Ctx) error {
 	userId := c.Params("id")
 
 	if err := h.userStore.DeleteUser(c.Context(), userId); err != nil {
-		return ErrBadRequest()
+		return types.ErrBadRequest()
 	}
 
 	return c.JSON(map[string]string{"message": "user deleted successfully", "id": userId})
@@ -85,7 +82,7 @@ func (h *UserHandler) HandleGetUser(c fiber.Ctx) error {
 func (h *UserHandler) HandleGetUsers(c fiber.Ctx) error {
 	users, err := h.userStore.GetUsers(c.Context())
 	if err != nil {
-		return ErrNotResourceNotFound("user")
+		return types.ErrResourceNotFound("user")
 	}
 	return c.JSON(users)
 }

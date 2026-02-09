@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/raminfathi/GoTel/types"
-
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -16,6 +16,7 @@ type BookingStore interface {
 	GetBookings(context.Context, bson.M) ([]*types.Booking, error)
 	GetBookingByID(context.Context, string) (*types.Booking, error)
 	UpdateBooking(context.Context, string, bson.M) error
+	IsRoomAvailable(context.Context, bson.ObjectID, time.Time, time.Time) (bool, error)
 }
 type MongoBookingStore struct {
 	client *mongo.Client
@@ -31,7 +32,26 @@ func NewMongoBookingStore(client *mongo.Client) *MongoBookingStore {
 	}
 
 }
+func (s *MongoBookingStore) IsRoomAvailable(ctx context.Context, roomID bson.ObjectID, from, till time.Time) (bool, error) {
+	filter := bson.M{
+		"roomID": roomID,
+		"fromDate": bson.M{
+			"$lt": till,
+		},
+		"tillDate": bson.M{
+			"$gt": from,
+		},
+		"canceled": false,
+	}
 
+	count, err := s.coll.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+
+	// If count is 0, it means no overlapping bookings found -> Room is available
+	return count == 0, nil
+}
 func (s *MongoBookingStore) UpdateBooking(ctx context.Context, id string, update bson.M) error {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {

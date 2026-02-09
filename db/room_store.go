@@ -19,7 +19,7 @@ type MongoRoomStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
 
-	HotelStore
+	HotelStore HotelStore
 }
 
 func NewMongoRoomStore(client *mongo.Client, HotelStore HotelStore) *MongoRoomStore {
