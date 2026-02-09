@@ -1,0 +1,49 @@
+version: '3'
+
+vars:
+  BINARY_NAME: api
+
+tasks:
+  default:
+    cmds:
+      - task: run
+
+  build:
+    desc: Build the application
+    cmds:
+      - go build -o bin/{{.BINARY_NAME}}{{exeExt}} cmd/api/main.go
+    vars:
+      exeExt: '{{if eq OS "windows"}}.exe{{end}}'
+
+  run:
+    desc: Run the application
+    deps: [build] 
+    cmds:
+      - ./bin/{{.BINARY_NAME}}{{exeExt}}
+    vars:
+      exeExt: '{{if eq OS "windows"}}.exe{{end}}'
+
+  seed:
+    desc: Seed the database
+    cmds:
+      - go run cmd/seed/main.go
+
+  test:
+    desc: Run all tests
+    cmds:
+      - go test -v ./...
+
+  docker:
+    desc: Build and run with Docker
+    cmds:
+      - echo "Building Docker image..."
+      - docker build -t gotel-api .
+      - echo "Running Docker container..."
+      - docker run -p 3000:3000 gotel-api
+
+  clean:
+    desc: Clean binary files
+    cmds:
+      - rm -rf bin
+      - cmd: powershell Remove-Item -Recurse -Force bin
+        platforms: [windows]
