@@ -36,8 +36,9 @@ jobs:
         version: latest
 
     - name: Run Tests
-      # We set the env var for test DB connection
       env:
-        MONGO_DB_URL_TEST: mongodb://localhost:27017
-        MONGO_DB_NAME: hotel_test_db
+        MONGO_DB_URL_TEST: ${{ vars.MONGO_DB_URL_TEST }}
+        MONGO_DB_NAME: ${{ vars.MONGO_DB_NAME }}
+        
+        JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
       run: go test -v ./...
