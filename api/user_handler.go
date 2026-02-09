@@ -59,7 +59,7 @@ func (h *UserHandler) HandlePostUser(c fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	insertedUser, err := h.userStore.InserUser(c.Context(), user)
+	insertedUser, err := h.userStore.InsertUser(c.Context(), user)
 	if err != nil {
 		return err
 	}

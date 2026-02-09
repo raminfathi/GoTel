@@ -8,6 +8,7 @@ import (
 
 	"github.com/raminfathi/GoTel/db"
 	"github.com/raminfathi/GoTel/types"
+	"golang.org/x/crypto/bcrypt"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -59,17 +60,25 @@ func AddHotel(store *db.Store, name string, loc string, rating int, rooms []bson
 }
 
 func AddUser(store *db.Store, fn, ln string, admin bool) *types.User {
-	user, err := types.NewUserFromParams(types.CreateUserParams{
-		Email:     fmt.Sprintf("%s@%s.com", fn, ln),
-		FirstName: fn,
-		LastName:  ln,
-		Password:  fmt.Sprintf("%s_%s", fn, ln),
-	})
+
+	pw := fmt.Sprintf("%s_%s", fn, ln)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
 	if err != nil {
 		log.Fatal(err)
 	}
-	user.IsAdmin = admin
-	insertedUser, err := store.User.InserUser(context.TODO(), user)
+
+	user := types.User{
+		FirstName: fn,
+		LastName:  ln,
+		Email:     fmt.Sprintf("%s@%s.com", fn, ln),
+		IsAdmin:   admin,
+		// 3. ذخیره هش در دیتابیس
+		EncryptedPassword: string(hashedPassword),
+		CreatedAt:         time.Now(),
+	}
+
+	insertedUser, err := store.User.InsertUser(context.TODO(), &user)
 	if err != nil {
 		log.Fatal(err)
 	}

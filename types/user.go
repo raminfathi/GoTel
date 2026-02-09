@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"regexp"
+	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"golang.org/x/crypto/bcrypt"
@@ -49,12 +50,14 @@ func isEmailValid(e string) bool {
 }
 
 type User struct {
+	// به جای bson.ObjectID باید primitive.ObjectID باشه
 	ID                bson.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	FirstName         string        `bson:"firstName" json:"firstName"`
 	LastName          string        `bson:"lastName" json:"lastName"`
 	Email             string        `bson:"email" json:"email"`
-	EncryptedPassword string        `bson:"EncryptedPassword" json:"-"`
+	EncryptedPassword string        `bson:"encryptedPassword" json:"-"`
 	IsAdmin           bool          `bson:"isAdmin" json:"isAdmin"`
+	CreatedAt         time.Time     `bson:"createdAt" json:"createdAt"`
 }
 
 func NewUserFromParams(params CreateUserParams) (*User, error) {
