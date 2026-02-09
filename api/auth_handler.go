@@ -65,7 +65,7 @@ func (h *AuthHandler) HandleAuthenticate(c fiber.Ctx) error {
 		return err
 	}
 
-	if !types.IsValidPassword(user.EncrypedPassword, params.Password) {
+	if !types.IsValidPassword(user.EncryptedPassword, params.Password) {
 		return invalidCredentials(c)
 	}
 
