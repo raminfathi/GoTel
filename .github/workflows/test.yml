@@ -11,10 +11,9 @@ jobs:
     name: Test & Build
     runs-on: ubuntu-latest
     
-    # We need a MongoDB service for integration tests
     services:
       mongodb:
-        image: mongo:5.0
+        image: mongo:latest
         ports:
           - 27017:27017
 
@@ -31,7 +30,7 @@ jobs:
       run: go mod download
 
     - name: Run Linter (GolangCI-Lint)
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v6
       with:
         version: latest
 
