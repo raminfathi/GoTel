@@ -13,10 +13,9 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN go build -o main .
-
+RUN go build -o main ./cmd/api
 # Expose the port specified by the PORT environment variable
-EXPOSE 3000
+EXPOSE 5000
 
 # Set the entry point of the container to the executable
 CMD ["./main"]
