@@ -32,3 +32,8 @@ type Room struct {
 type HotelQueryParams struct {
 	Rating int `query:"rating" json:"rating"`
 }
+type ResourceResp struct {
+	Results int `json:"results"`
+	Data    any `json:"data"`
+	Page    int `json:"page"`
+}

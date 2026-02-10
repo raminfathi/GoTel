@@ -1,8 +1,10 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/raminfathi/GoTel/db"
 	"github.com/raminfathi/GoTel/types"
@@ -21,10 +23,32 @@ func NewRoomHandler(store *db.Store) *RoomHandler {
 	}
 }
 func (h *RoomHandler) HandleGetRooms(c fiber.Ctx) error {
-	rooms, err := h.store.Room.GetRooms(c.Context(), bson.M{})
-	if err != nil {
-		return err
+
+	cacheKey := "rooms-" + c.OriginalURL()
+	val, err := h.store.Cache.Get(c.Context(), cacheKey)
+	if err == nil && val != "" {
+		var rooms []*types.Room
+		if err := json.Unmarshal([]byte(val), &rooms); err == nil {
+			return c.JSON(rooms)
+		}
 	}
+	filter := bson.M{}
+	if hotelID := c.Query("hotelId"); hotelID != "" {
+		oid, err := bson.ObjectIDFromHex(hotelID)
+		if err != nil {
+			return types.ErrInvalidID()
+		}
+		filter["hotelID"] = oid
+	}
+	rooms, err := h.store.Room.GetRooms(c.Context(), filter)
+	if err != nil {
+		return types.ErrResourceNotFound("rooms")
+	}
+	serialized, err := json.Marshal(rooms)
+	if err == nil {
+		h.store.Cache.Set(c.Context(), cacheKey, serialized, time.Minute*1)
+	}
+
 	return c.JSON(rooms)
 }
 func (h *RoomHandler) HandleBookRoom(c fiber.Ctx) error {
