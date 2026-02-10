@@ -1,11 +1,8 @@
 version: '3'
-
 dotenv: ['.env']
-
 vars:
   BINARY_NAME: api
   DEFAULT_PORT: 3000
-
 tasks:
   default:
     cmds:
@@ -18,8 +15,25 @@ tasks:
     vars:
       exeExt: '{{if eq OS "windows"}}.exe{{end}}'
 
+  run:
+    desc: Run the application
+    deps: [build] 
+    cmds:
+      - ./bin/{{.BINARY_NAME}}{{exeExt}}
+    vars:
+      exeExt: '{{if eq OS "windows"}}.exe{{end}}'
 
-  docker:
+  seed:
+    desc: Seed the database
+    cmds:
+      - go run cmd/seed/main.go
+
+  test:
+    desc: Run all tests
+    cmds:
+      - go test -v ./...
+
+docker:
     desc: Build and run with Docker
     cmds:
       - echo "Building Docker image..."
@@ -29,9 +43,9 @@ tasks:
     vars:
       HTTP_PORT: '{{default .DEFAULT_PORT .HTTP_LISTEN_ADDRESS | replace ":" ""}}'
 
-  clean:
-    desc: Clean binary files
-    cmds:
-      - rm -rf bin
-      - cmd: powershell Remove-Item -Recurse -Force bin
-        platforms: [windows]
+clean:
+  desc: Clean binary files
+  cmds:
+    - rm -rf bin
+    - cmd: powershell Remove-Item -Recurse -Force bin
+      platforms: [windows]
