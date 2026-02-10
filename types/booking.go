@@ -16,9 +16,9 @@ type Booking struct {
 	Canceled   bool          `bson:"canceled" json:"canceled"`
 }
 type BookRoomParams struct {
-	FromDate   time.Time `json:"fromDate"`
-	TillDate   time.Time `json:"tillDate"`
-	NumPersons int       `json:"numPersons"`
+	FromDate   time.Time `json:"fromDate" validate:"required"`
+	TillDate   time.Time `json:"tillDate" validate:"required,gtfield=FromDate"`
+	NumPersons int       `json:"numPersons" validate:"required,min=1,max=5"`
 }
 
 func (p BookRoomParams) Validate() map[string]string {

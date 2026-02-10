@@ -14,6 +14,18 @@ import (
 
 func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 	return func(c fiber.Ctx) error {
+		// ---------------------------------------------------------
+		// 1. SKIP LOGIC (Allow Public Routes)
+		// ---------------------------------------------------------
+		// We explicitly check if the request is for Registration.
+		// If it is POST /api/v1/user, we skip authentication.
+		if c.Path() == "/api/v1/user" && c.Method() == "POST" {
+			return c.Next()
+		}
+
+		// ---------------------------------------------------------
+		// 2. AUTHENTICATION LOGIC
+		// ---------------------------------------------------------
 		token := c.Get("X-Api-Token")
 
 		if token == "" {

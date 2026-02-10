@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: gotel_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:alpine
+    container_name: gotel_redis
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    container_name: gotel_api
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      - HTTP_LISTEN_ADDRESS=:5000
+      - MONGO_DB_NAME=GoTel
+      - JWT_SECRET=${JWT_SECRET} 
+      
+      - MONGO_DB_URL=mongodb://mongo:27017
+      - REDIS_URL=redis:6379
+
+volumes:
+  mongo_data:

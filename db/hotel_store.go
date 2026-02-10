@@ -26,6 +26,9 @@ type MongoHotelStore struct {
 
 func NewMongoHotelStore(client *mongo.Client) *MongoHotelStore {
 	dbname := os.Getenv(MongoDBNameEnvName)
+	if dbname == "" {
+		dbname = "hotel_db"
+	}
 
 	return &MongoHotelStore{
 		client: client,

@@ -1,23 +1,31 @@
-FROM golang:1.25.5-alpine
-
-# Set the working directory to /app
+# Stage 1: Build the application
+# استفاده از نسخه 1.25 (یا latest)
+FROM golang:1.25-alpine as builder
 WORKDIR /app
 
-# Copy the go.mod and go.sum files to the working directory
+# Copy go mod and sum files
 COPY go.mod go.sum ./
 
-# Download and install any required Go dependencies
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 
-# Copy the entire source code to the working directory
+# Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# Build the Go application
-RUN go build -o main ./cmd/api
-# Expose the port specified by the PORT environment variable
+# Build the Go app
+# We explicitly disable CGO for a static binary and point to main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o main cmd/api/main.go
+
+# Stage 2: Run the application
+FROM alpine:latest  
+
+WORKDIR /root/
+
+# Copy the Pre-built binary file from the previous stage
+COPY --from=builder /app/main .
+
+# Expose port 5000 to the outside world
 EXPOSE 5000
 
-# Set the entry point of the container to the executable
+# Command to run the executable
 CMD ["./main"]
-
-

@@ -19,11 +19,6 @@ type AuthHandler struct {
 	userStore db.UserStore
 }
 
-type AuthParams struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type AuthResponse struct {
 	User  *types.User `json:"user"`
 	Token string      `json:"token"`
@@ -41,11 +36,13 @@ func NewAuthHandler(userStore db.UserStore) *AuthHandler {
 }
 
 func (h *AuthHandler) HandleAuthenticate(c fiber.Ctx) error {
-	var params AuthParams
+	var params types.AuthParams
 	if err := c.Bind().Body(&params); err != nil {
-		return err
+		return types.ErrBadRequest()
 	}
-
+	if errors := ValidateRequest(params); errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
 	user, err := h.userStore.GetUserByEmail(c.Context(), params.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {

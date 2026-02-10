@@ -22,13 +22,13 @@ type ResourceResp struct {
 }
 
 type CreateHotelParams struct {
-	Name     string `json:"name"`
-	Location string `json:"location"`
+	Name     string `json:"name" validate:"required,min=3,max=100"`
+	Location string `json:"location" validate:"required,min=3,max=100"`
 }
 
 type UpdateHotelParams struct {
-	Name     string `json:"name"`
-	Location string `json:"location"`
+	Name     string `json:"name" validate:"omitempty,min=3,max=100"` // omitempty یعنی اگر نفرستاد گیر نده
+	Location string `json:"location" validate:"omitempty,min=3,max=100"`
 }
 
 func (p CreateHotelParams) Validate() map[string]string {

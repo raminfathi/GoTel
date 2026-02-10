@@ -1,8 +1,6 @@
 package types
 
 import (
-	"fmt"
-	"regexp"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -10,44 +8,19 @@ import (
 )
 
 const (
-	bcrypetCost     = 12
-	minFirstNameLen = 2
-	minLastNameLen  = 2
-	minPasswordLen  = 7
+	bcrypetCost = 12
 )
 
 type CreateUserParams struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
+	FirstName string `json:"firstName" validate:"required,min=2,max=50"`
+	LastName  string `json:"lastName" validate:"required,min=2,max=50"`
+	Email     string `json:"email" validate:"required,email"`
+	Password  string `json:"password" validate:"required,min=7"`
 }
 
-func (params CreateUserParams) Validate() map[string]string {
-	errors := map[string]string{}
-	if len(params.FirstName) < minFirstNameLen {
-		errors["firstNami"] = fmt.Sprintf("firsName lenth should be at least %d characters", minFirstNameLen)
-	}
-	if len(params.LastName) < minLastNameLen {
-		errors["lastName"] = fmt.Sprintf("lastName lenth should be at least %d characters", minLastNameLen)
-
-	}
-	if len(params.Password) < minPasswordLen {
-		errors["password"] = fmt.Sprintf("password lenth should be at least %d characters", minPasswordLen)
-	}
-	if !isEmailValid(params.Email) {
-		errors["email"] = fmt.Sprintf("email %s is invalid", params.Email)
-	}
-	return errors
-}
-func IsValidPassword(encpw, pw string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(encpw), []byte(pw)) == nil
-}
-
-func isEmailValid(e string) bool {
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	return emailRegex.MatchString(e)
-}
+// func IsValidPassword(encpw, pw string) bool {
+// 	return bcrypt.CompareHashAndPassword([]byte(encpw), []byte(pw)) == nil
+// }
 
 type User struct {
 	// به جای bson.ObjectID باید primitive.ObjectID باشه
@@ -70,6 +43,7 @@ func NewUserFromParams(params CreateUserParams) (*User, error) {
 		LastName:          params.LastName,
 		Email:             params.Email,
 		EncryptedPassword: string(encpw),
+		CreatedAt:         time.Now(),
 	}, nil
 }
 
@@ -99,4 +73,9 @@ func HashPassword(password string) (string, error) {
 func ValidatePassword(hashedPassword, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	return err == nil
+}
+
+type AuthParams struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
 }

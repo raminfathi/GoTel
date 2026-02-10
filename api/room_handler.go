@@ -56,20 +56,17 @@ func (h *RoomHandler) HandleBookRoom(c fiber.Ctx) error {
 	if err := c.Bind().Body(&params); err != nil {
 		return err
 	}
-	if errors := params.Validate(); len(errors) > 0 {
+
+	if errors := ValidateRequest(params); errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 	roomID, err := bson.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
 		return types.ErrInvalidID()
 	}
-	userCtx := c.Locals("user")
-
-	user, ok := userCtx.(*types.User)
+	user, ok := c.Locals("user").(*types.User)
 	if !ok {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "internal server error (user not found in context)",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "user not found in context"})
 	}
 	ok, err = h.store.Booking.IsRoomAvailable(c.Context(), roomID, params.FromDate, params.TillDate)
 	if err != nil {

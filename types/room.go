@@ -20,12 +20,12 @@ type Room struct {
 }
 
 // ---------------------------------------------
-// ورودی کاربر (DTO)
+// (DTO)
 // ---------------------------------------------
 type CreateRoomParams struct {
-	HotelID   string  `json:"hotelId"`
-	Type      string  `json:"type"`
-	BasePrice float64 `json:"basePrice"`
+	HotelID   string  `json:"hotelId" validate:"required,len=24"`
+	Type      string  `json:"type" validate:"required,min=2"`
+	BasePrice float64 `json:"basePrice" validate:"required,min=10"`
 }
 
 func (p CreateRoomParams) Validate() map[string]string {

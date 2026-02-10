@@ -49,8 +49,15 @@ func (h *UserHandler) HandlePostUser(c fiber.Ctx) error {
 	if err := c.Bind().Body(&params); err != nil {
 		return err
 	}
-	if errors := params.Validate(); len(errors) > 0 {
-		return c.JSON(errors)
+	if errors := ValidateRequest(params); errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+	_, err := h.userStore.GetUserByEmail(c.Context(), params.Email)
+	if err == nil {
+		// ارور nil یعنی یوزر پیدا شد -> پس تکراریه
+		return c.Status(fiber.StatusBadRequest).JSON(map[string]string{
+			"error": "email already exists",
+		})
 	}
 	user, err := types.NewUserFromParams(params)
 	if err != nil {
