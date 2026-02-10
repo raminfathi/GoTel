@@ -51,11 +51,31 @@ func (h *HotelHandler) HandleGetRooms(c fiber.Ctx) error {
 func (h *HotelHandler) HandleGetHotel(c fiber.Ctx) error {
 
 	id := c.Params("id")
+
+	cacheKey := "hotel-" + id
+
+	val, err := h.store.Cache.Get(c.Context(), cacheKey)
+	if err == nil && val != "" {
+		var hotel types.Hotel
+		if err := json.Unmarshal([]byte(val), &hotel); err == nil {
+			return c.JSON(hotel)
+		}
+	}
+	// oid, err := bson.ObjectIDFromHex(id)
+	// if err != nil {
+	// 	return types.ErrInvalidID()
+	// }
 	hotel, err := h.store.Hotel.GetHotelByID(c.Context(), id)
 	if err != nil {
 		return types.ErrResourceNotFound("hotel")
 	}
+	serialized, err := json.Marshal(hotel)
+	if err == nil {
+		h.store.Cache.Set(c.Context(), cacheKey, serialized, time.Minute*5)
+	}
+
 	return c.JSON(hotel)
+
 }
 
 // type ResourceResp struct {
