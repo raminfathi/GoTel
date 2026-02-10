@@ -16,6 +16,7 @@ type HotelStore interface {
 	UpdateHotel(context.Context, Map, Map) error
 	GetHotels(context.Context, Map, *Pagination) ([]*types.Hotel, error)
 	GetHotelByID(context.Context, string) (*types.Hotel, error)
+	UpdateHotelsRooms(context.Context, bson.ObjectID, bson.ObjectID) error
 }
 
 type MongoHotelStore struct {
@@ -30,6 +31,15 @@ func NewMongoHotelStore(client *mongo.Client) *MongoHotelStore {
 		client: client,
 		coll:   client.Database(dbname).Collection("hotels"),
 	}
+}
+func (s *MongoHotelStore) UpdateHotelsRooms(ctx context.Context, hotelID bson.ObjectID, roomID bson.ObjectID) error {
+	filter := bson.M{"_id": hotelID}
+
+	// اینجا مستقیماً از $push استفاده می‌کنیم و دیگه $set نداریم
+	update := bson.M{"$push": bson.M{"rooms": roomID}}
+
+	_, err := s.coll.UpdateOne(ctx, filter, update)
+	return err
 }
 func (s *MongoHotelStore) GetHotelByID(ctx context.Context, id string) (*types.Hotel, error) {
 	fmt.Println(id)
@@ -61,7 +71,8 @@ func (s *MongoHotelStore) GetHotels(ctx context.Context, filter Map, pag *Pagina
 	return hotels, nil
 }
 func (s *MongoHotelStore) UpdateHotel(ctx context.Context, filter Map, update Map) error {
-	_, err := s.coll.UpdateOne(ctx, filter, update)
+	doc := bson.M{"$set": update}
+	_, err := s.coll.UpdateOne(ctx, filter, doc)
 	return err
 }
 

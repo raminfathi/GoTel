@@ -1,6 +1,8 @@
 package types
 
-import "go.mongodb.org/mongo-driver/v2/bson"
+import (
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
 
 type Hotel struct {
 	ID       bson.ObjectID   `bson:"_id,omitempty" json:"id,omitempty"`
@@ -10,25 +12,6 @@ type Hotel struct {
 	Rating   int             `bson:"rating" json:"rating"`
 }
 
-// RoomType uses an Enum for better type safety
-type RoomType int
-
-const (
-	_ RoomType = iota
-	SingleRoomType
-	DoubleRoomType
-	SeaViewRoomType
-	DeluxeRoomType
-)
-
-type Room struct {
-	ID        bson.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Type      RoomType      `bson:"type" json:"type"`
-	BasePrice float64       `bson:"basePrice" json:"basePrice"`
-	Price     float64       `bson:"price" json:"price"`
-	HotelID   bson.ObjectID `bson:"hotelID" json:"hotelId"`
-}
-
 type HotelQueryParams struct {
 	Rating int `query:"rating" json:"rating"`
 }
@@ -36,4 +19,25 @@ type ResourceResp struct {
 	Results int `json:"results"`
 	Data    any `json:"data"`
 	Page    int `json:"page"`
+}
+
+type CreateHotelParams struct {
+	Name     string `json:"name"`
+	Location string `json:"location"`
+}
+
+type UpdateHotelParams struct {
+	Name     string `json:"name"`
+	Location string `json:"location"`
+}
+
+func (p CreateHotelParams) Validate() map[string]string {
+	errors := map[string]string{}
+	if len(p.Name) < 3 {
+		errors["name"] = "name must be at least 3 characters"
+	}
+	if len(p.Location) < 3 {
+		errors["location"] = "location must be at least 3 characters"
+	}
+	return errors
 }

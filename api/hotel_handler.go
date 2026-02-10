@@ -78,12 +78,6 @@ func (h *HotelHandler) HandleGetHotel(c fiber.Ctx) error {
 
 }
 
-// type ResourceResp struct {
-// 	Results int `json:"results"`
-// 	Data    any `json:"data"`
-// 	Page    int `json:"page"`
-// }
-
 type HotelQueryParams struct {
 	db.Pagination
 	Rating int
@@ -126,4 +120,63 @@ func (h *HotelHandler) HandleGetHotels(c fiber.Ctx) error {
 		h.store.Cache.Set(c.Context(), cacheKey, serialized, time.Second*30)
 	}
 	return c.JSON(resp)
+}
+
+// HandlePostHotel (Admin Only)
+func (h *HotelHandler) HandlePostHotel(c fiber.Ctx) error {
+	var params types.CreateHotelParams
+	if err := c.Bind().Body(&params); err != nil {
+		return types.ErrBadRequest()
+	}
+
+	if errors := params.Validate(); len(errors) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+
+	hotel := types.Hotel{
+		Name:     params.Name,
+		Location: params.Location,
+		Rating:   0,
+		Rooms:    []bson.ObjectID{},
+	}
+
+	insertedHotel, err := h.store.Hotel.InsertHotel(c.Context(), &hotel)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(insertedHotel)
+}
+
+// HandlePutHotel (Admin Only)
+func (h *HotelHandler) HandlePutHotel(c fiber.Ctx) error {
+	id := c.Params("id")
+
+	var params types.UpdateHotelParams
+	if err := c.Bind().Body(&params); err != nil {
+		return types.ErrBadRequest()
+	}
+
+	updateData := db.Map{}
+	if params.Name != "" {
+		updateData["name"] = params.Name
+	}
+	if params.Location != "" {
+		updateData["location"] = params.Location
+	}
+
+	oid, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return types.ErrInvalidID()
+	}
+
+	filter := db.Map{"_id": oid}
+
+	if err := h.store.Hotel.UpdateHotel(c.Context(), filter, updateData); err != nil {
+		return err
+	}
+
+	// h.store.Cache.Delete(c.Context(), "hotel-"+id)
+
+	return c.JSON(db.Map{"msg": "updated successfully"})
 }

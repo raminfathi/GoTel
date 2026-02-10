@@ -82,10 +82,12 @@ func main() {
 	apiv1.Get("/hotel", hotelHandler.HandleGetHotels)
 	apiv1.Get("/hotel/:id", hotelHandler.HandleGetHotel)
 	apiv1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
-
+	admin.Post("/hotel", hotelHandler.HandlePostHotel)
+	admin.Put("/hotel/:id", hotelHandler.HandlePutHotel)
 	// room handler
 	apiv1.Get("/room", roomHandler.HandleGetRooms)
 	apiv1.Post("/room/:id/book", roomHandler.HandleBookRoom)
+	admin.Post("/room", roomHandler.HandlePostRoom)
 	// booking handler
 	apiv1.Get("/booking", bookingHandler.HandleGetMyBookings)
 	apiv1.Get("/booking/:id", bookingHandler.HandleGetBooking)

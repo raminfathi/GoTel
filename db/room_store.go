@@ -42,18 +42,17 @@ func (s *MongoRoomStore) GetRooms(ctx context.Context, filter bson.M) ([]*types.
 	}
 	return rooms, nil
 }
-
 func (s *MongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*types.Room, error) {
+	// 1. اتاق رو اینسرت کن
 	resp, err := s.coll.InsertOne(ctx, room)
 	if err != nil {
 		return nil, err
 	}
 	room.ID = resp.InsertedID.(bson.ObjectID)
 
-	filter := Map{"_id": room.HotelID}
-	update := Map{"$push": bson.M{"rooms": room.ID}}
-	if err := s.HotelStore.UpdateHotel(ctx, filter, update); err != nil {
+	if err := s.HotelStore.UpdateHotelsRooms(ctx, room.HotelID, room.ID); err != nil {
 		return nil, err
 	}
+
 	return room, nil
 }

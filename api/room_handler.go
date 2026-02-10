@@ -95,3 +95,42 @@ func (h *RoomHandler) HandleBookRoom(c fiber.Ctx) error {
 	}
 	return c.JSON(inserted)
 }
+func (h *RoomHandler) HandlePostRoom(c fiber.Ctx) error {
+	var params types.CreateRoomParams
+	if err := c.Bind().Body(&params); err != nil {
+		return types.ErrBadRequest()
+	}
+
+	if errors := params.Validate(); len(errors) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+
+	hotelOID, err := bson.ObjectIDFromHex(params.HotelID)
+	if err != nil {
+		return types.ErrInvalidID()
+	}
+
+	room := types.Room{
+		HotelID:   hotelOID,
+		BasePrice: params.BasePrice,
+		Price:     params.BasePrice,
+	}
+
+	switch params.Type {
+	case "single":
+		room.Type = types.Single
+	case "double":
+		room.Type = types.Double
+	case "seaview":
+		room.Type = types.SeaView
+	default:
+		room.Type = types.Single
+	}
+
+	insertedRoom, err := h.store.Room.InsertRoom(c.Context(), &room)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(insertedRoom)
+}
