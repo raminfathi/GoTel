@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/raminfathi/GoTel/db"
 	"github.com/raminfathi/GoTel/types"
 
@@ -23,11 +25,14 @@ func (h *HotelHandler) HandleGetRooms(c fiber.Ctx) error {
 	if err != nil {
 		return types.ErrInvalidID()
 	}
-	filter := bson.M{"HotelID": oid}
+	filter := bson.M{"hotelID": oid}
+
 	rooms, err := h.store.Room.GetRooms(c.Context(), filter)
 	if err != nil {
 		return types.ErrResourceNotFound("hotel")
 	}
+	fmt.Println("rooms -> ", rooms)
+
 	return c.JSON(rooms)
 }
 func (h *HotelHandler) HandleGetHotel(c fiber.Ctx) error {

@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/raminfathi/GoTel/api"
 	"github.com/raminfathi/GoTel/api/middleware"
 	"github.com/raminfathi/GoTel/db"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
@@ -21,6 +23,13 @@ var config = fiber.Config{
 
 func main() {
 	mongoEndpoint := os.Getenv("MONGO_DB_URL")
+	redisAddr := os.Getenv("REDIS_URL")
+	redisPw := os.Getenv("REDIS_PASSWORD")
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: redisPw,
+		DB:       0,
+	})
 
 	client, err := mongo.Connect(options.Client().ApplyURI(mongoEndpoint))
 	if err != nil {
@@ -33,16 +42,17 @@ func main() {
 		}
 	}()
 	var (
-		// listenAddr   = flag.String("listenAddr", ":5000", "The listen address of the API server")
 		hotelStore   = db.NewMongoHotelStore(client)
 		roomStore    = db.NewMongoRoomStore(client, hotelStore)
 		userStore    = db.NewMongoUserStore(client)
 		bookingStore = db.NewMongoBookingStore(client)
+		cacheStore   = db.NewRedisCacheStore(redisClient)
 		store        = &db.Store{
 			Hotel:   hotelStore,
 			Room:    roomStore,
 			User:    userStore,
 			Booking: bookingStore,
+			Cache:   cacheStore,
 		}
 		hotelHandler   = api.NewHotelHandler(store)
 		authHandler    = api.NewAuthHandler(userStore)
@@ -56,7 +66,7 @@ func main() {
 		apiv1 = app.Group("/api/v1", middleware.JWTAuthentication(userStore))
 		admin = apiv1.Group("/admin", api.AdminAuth)
 	)
-
+	fmt.Println("Redis client initialized:", redisClient)
 	// auth
 	auth.Post("auth", authHandler.HandleAuthenticate)
 
@@ -76,8 +86,8 @@ func main() {
 	// room handler
 	apiv1.Get("/room", roomHandler.HandleGetRooms)
 	apiv1.Post("/room/:id/book", roomHandler.HandleBookRoom)
-	// TODO cancel a bookin
 	// booking handler
+	apiv1.Get("/booking", bookingHandler.HandleGetMyBookings)
 	apiv1.Get("/booking/:id", bookingHandler.HandleGetBooking)
 	apiv1.Get("/booking/:id/cancel", bookingHandler.HandleCancelBooking)
 	//admin handler

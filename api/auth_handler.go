@@ -11,10 +11,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/raminfathi/GoTel/db"
 	"github.com/raminfathi/GoTel/types"
-	"go.mongodb.org/mongo-driver/v2/mongo" 
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
-
 
 type AuthHandler struct {
 	userStore db.UserStore
@@ -35,13 +34,11 @@ type genericResp struct {
 	Msg  string `json:"msg"`
 }
 
-
 func NewAuthHandler(userStore db.UserStore) *AuthHandler {
 	return &AuthHandler{
 		userStore: userStore,
 	}
 }
-
 
 func (h *AuthHandler) HandleAuthenticate(c fiber.Ctx) error {
 	var params AuthParams
@@ -59,7 +56,7 @@ func (h *AuthHandler) HandleAuthenticate(c fiber.Ctx) error {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPassword), []byte(params.Password))
 	if err != nil {
-		fmt.Println("Password mismatch error:", err) // جهت دیباگ
+		fmt.Println("Password mismatch error:", err)
 		return invalidCredentials(c)
 	}
 
@@ -82,7 +79,7 @@ func CreateTokenFromUser(user *types.User) string {
 	validUntil := now.Add(time.Hour * 4).Unix()
 
 	claims := jwt.MapClaims{
-		"id":      user.ID, 
+		"id":      user.ID,
 		"email":   user.Email,
 		"expires": validUntil,
 	}
