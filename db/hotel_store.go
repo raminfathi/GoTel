@@ -35,7 +35,6 @@ func NewMongoHotelStore(client *mongo.Client) *MongoHotelStore {
 func (s *MongoHotelStore) UpdateHotelsRooms(ctx context.Context, hotelID bson.ObjectID, roomID bson.ObjectID) error {
 	filter := bson.M{"_id": hotelID}
 
-	// اینجا مستقیماً از $push استفاده می‌کنیم و دیگه $set نداریم
 	update := bson.M{"$push": bson.M{"rooms": roomID}}
 
 	_, err := s.coll.UpdateOne(ctx, filter, update)
