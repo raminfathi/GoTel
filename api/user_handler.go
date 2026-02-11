@@ -20,6 +20,17 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 	}
 }
 
+// HandlePutUser updates a user
+// @Summary      Update a user
+// @Description  Update user details by ID
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        id      path    string                true  "User ID"
+// @Param        request body    types.UpdateUserParams true  "Update Data"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200     {object}  map[string]string
+// @Router       /user/{id} [put]
 func (h *UserHandler) HandlePutUser(c fiber.Ctx) error {
 	var params types.UpdateUserParams
 	userId := c.Params("id")
@@ -35,6 +46,16 @@ func (h *UserHandler) HandlePutUser(c fiber.Ctx) error {
 	return c.JSON(map[string]string{"message": "user updated successfully", "id": userId})
 }
 
+// HandleDeleteUser deletes a user
+// @Summary      Delete a user
+// @Description  Delete a user by ID
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "User ID"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {object}  map[string]string
+// @Router       /user/{id} [delete]
 func (h *UserHandler) HandleDeleteUser(c fiber.Ctx) error {
 	userId := c.Params("id")
 
@@ -44,6 +65,17 @@ func (h *UserHandler) HandleDeleteUser(c fiber.Ctx) error {
 
 	return c.JSON(map[string]string{"message": "user deleted successfully", "id": userId})
 }
+
+// HandlePostUser creates a new user (Registration)
+// @Summary      Register a new user
+// @Description  Create a new user account
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        request body types.CreateUserParams true "User Data"
+// @Success      200  {object}  types.User
+// @Failure      400  {object}  map[string]string
+// @Router       /user [post]
 func (h *UserHandler) HandlePostUser(c fiber.Ctx) error {
 	var params types.CreateUserParams
 	if err := c.Bind().Body(&params); err != nil {
@@ -70,6 +102,17 @@ func (h *UserHandler) HandlePostUser(c fiber.Ctx) error {
 	return c.JSON(insertedUser)
 }
 
+// HandleGetUser returns a user by ID
+// @Summary      Get a user
+// @Description  Get a user by their ID
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "User ID"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {object}  types.User
+// @Failure      404  {object}  map[string]string
+// @Router       /user/{id} [get]
 func (h *UserHandler) HandleGetUser(c fiber.Ctx) error {
 
 	var (
@@ -86,6 +129,16 @@ func (h *UserHandler) HandleGetUser(c fiber.Ctx) error {
 	return c.JSON(user)
 }
 
+// HandleGetUsers returns all users (Admin only)
+// @Summary      Get all users
+// @Description  Get a list of all registered users (Admin only)
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {array}  types.User
+// @Failure      403  {object}  map[string]string
+// @Router       /admin/user [get]
 func (h *UserHandler) HandleGetUsers(c fiber.Ctx) error {
 	users, err := h.userStore.GetUsers(c.Context())
 	if err != nil {

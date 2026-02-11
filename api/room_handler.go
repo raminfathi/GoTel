@@ -22,6 +22,16 @@ func NewRoomHandler(store *db.Store) *RoomHandler {
 		store: store,
 	}
 }
+
+// HandleGetRooms returns all rooms
+// @Summary      Get all rooms
+// @Description  Get a list of all rooms
+// @Tags         room
+// @Accept       json
+// @Produce      json
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {array}   types.Room
+// @Router       /room [get]
 func (h *RoomHandler) HandleGetRooms(c fiber.Ctx) error {
 
 	cacheKey := "rooms-" + c.OriginalURL()
@@ -51,6 +61,19 @@ func (h *RoomHandler) HandleGetRooms(c fiber.Ctx) error {
 
 	return c.JSON(rooms)
 }
+
+// HandleBookRoom creates a booking for a room
+// @Summary      Book a room
+// @Description  Book a specific room for a date range
+// @Tags         room
+// @Accept       json
+// @Produce      json
+// @Param        id      path    string                true  "Room ID"
+// @Param        request body    types.BookRoomParams  true  "Booking Details"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200     {object}  types.Booking
+// @Failure      400     {object}  map[string]string
+// @Router       /room/{id}/book [post]
 func (h *RoomHandler) HandleBookRoom(c fiber.Ctx) error {
 	var params types.BookRoomParams
 	if err := c.Bind().Body(&params); err != nil {
@@ -92,6 +115,17 @@ func (h *RoomHandler) HandleBookRoom(c fiber.Ctx) error {
 	}
 	return c.JSON(inserted)
 }
+
+// HandlePostRoom adds a new room (Admin only)
+// @Summary      Add a room
+// @Description  Add a new room to a hotel
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        request body types.CreateRoomParams true "Room Data"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {object}  types.Room
+// @Router       /admin/room [post]
 func (h *RoomHandler) HandlePostRoom(c fiber.Ctx) error {
 	var params types.CreateRoomParams
 	if err := c.Bind().Body(&params); err != nil {

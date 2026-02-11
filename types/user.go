@@ -23,7 +23,6 @@ type CreateUserParams struct {
 // }
 
 type User struct {
-	// به جای bson.ObjectID باید primitive.ObjectID باشه
 	ID                bson.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	FirstName         string        `bson:"firstName" json:"firstName"`
 	LastName          string        `bson:"lastName" json:"lastName"`

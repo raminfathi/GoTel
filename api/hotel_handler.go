@@ -20,6 +20,17 @@ func NewHotelHandler(store *db.Store) *HotelHandler {
 		store: store,
 	}
 }
+
+// HandleGetRooms returns rooms of a specific hotel
+// @Summary      Get hotel rooms
+// @Description  Get all rooms belonging to a specific hotel
+// @Tags         hotel
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "Hotel ID"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {array}   types.Room
+// @Router       /hotel/{id}/rooms [get]
 func (h *HotelHandler) HandleGetRooms(c fiber.Ctx) error {
 	id := c.Params("id")
 	cacheKey := "hotel-rooms-" + c.OriginalURL()
@@ -48,6 +59,18 @@ func (h *HotelHandler) HandleGetRooms(c fiber.Ctx) error {
 
 	return c.JSON(rooms)
 }
+
+// HandleGetHotel returns a single hotel
+// @Summary      Get hotel by ID
+// @Description  Get detailed information of a specific hotel
+// @Tags         hotel
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "Hotel ID"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {object}  types.Hotel
+// @Failure      404  {object}  map[string]string
+// @Router       /hotel/{id} [get]
 func (h *HotelHandler) HandleGetHotel(c fiber.Ctx) error {
 
 	id := c.Params("id")
@@ -83,6 +106,15 @@ type HotelQueryParams struct {
 	Rating int
 }
 
+// HandleGetHotels returns all hotels
+// @Summary      Get all hotels
+// @Description  Get a list of all hotels with filtering options
+// @Tags         hotel
+// @Accept       json
+// @Produce      json
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {array}   types.Hotel
+// @Router       /hotel [get]
 func (h *HotelHandler) HandleGetHotels(c fiber.Ctx) error {
 	var params HotelQueryParams
 	if err := c.Bind().Query(&params); err != nil {
@@ -122,7 +154,16 @@ func (h *HotelHandler) HandleGetHotels(c fiber.Ctx) error {
 	return c.JSON(resp)
 }
 
-// HandlePostHotel (Admin Only)
+// HandlePostHotel adds a new hotel (Admin only)
+// @Summary      Add a hotel
+// @Description  Add a new hotel
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        request body types.CreateHotelParams true "Hotel Data"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {object}  types.Hotel
+// @Router       /admin/hotel [post]
 func (h *HotelHandler) HandlePostHotel(c fiber.Ctx) error {
 	var params types.CreateHotelParams
 	if err := c.Bind().Body(&params); err != nil {
@@ -149,6 +190,17 @@ func (h *HotelHandler) HandlePostHotel(c fiber.Ctx) error {
 }
 
 // HandlePutHotel (Admin Only)
+// HandlePutHotel updates a hotel (Admin only)
+// @Summary      Update a hotel
+// @Description  Update hotel details
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        id      path    string                true  "Hotel ID"
+// @Param        request body    types.UpdateHotelParams true  "Update Data"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200     {object}  map[string]string
+// @Router       /admin/hotel/{id} [put]
 func (h *HotelHandler) HandlePutHotel(c fiber.Ctx) error {
 	id := c.Params("id")
 

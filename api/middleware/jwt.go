@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/raminfathi/GoTel/db"
@@ -19,7 +20,24 @@ func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 		// ---------------------------------------------------------
 		// We explicitly check if the request is for Registration.
 		// If it is POST /api/v1/user, we skip authentication.
-		if c.Path() == "/api/v1/user" && c.Method() == "POST" {
+		path := c.Path()
+		method := c.Method()
+		fmt.Printf("🛡️ Middleware Check -> Method: %s | Path: %s\n", method, path)
+		if method == "OPTIONS" {
+			return c.Next()
+		}
+		if strings.Contains(path, "/auth") {
+			return c.Next()
+		}
+		if method == "POST" && strings.Contains(path, "/user") {
+			return c.Next()
+		}
+
+		if strings.Contains(path, "/swagger") {
+			return c.Next()
+		}
+
+		if len(path) > 8 && path[:8] == "/swagger" {
 			return c.Next()
 		}
 

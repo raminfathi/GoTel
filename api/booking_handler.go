@@ -22,6 +22,15 @@ func NewBookingHandler(store *db.Store) *BookingHandler {
 	}
 }
 
+// HandleGetMyBookings returns user bookings
+// @Summary      Get my bookings
+// @Description  Get all bookings for the logged-in user
+// @Tags         booking
+// @Accept       json
+// @Produce      json
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {array}   types.Booking
+// @Router       /booking [get]
 func (h *BookingHandler) HandleGetMyBookings(c fiber.Ctx) error {
 	user, err := getAuthUser(c)
 	if err != nil {
@@ -41,6 +50,17 @@ func (h *BookingHandler) HandleGetMyBookings(c fiber.Ctx) error {
 
 	return c.JSON(bookings)
 }
+
+// HandleCancelBooking cancels a booking
+// @Summary      Cancel booking
+// @Description  Cancel a booking (Method is POST/PUT for safety)
+// @Tags         booking
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "Booking ID"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {object}  map[string]string
+// @Router       /booking/{id}/cancel [post]
 func (h *BookingHandler) HandleCancelBooking(c fiber.Ctx) error {
 	id := c.Params("id")
 	booking, err := h.store.Booking.GetBookingByID(c.Context(), id)
@@ -69,6 +89,15 @@ func (h *BookingHandler) HandleCancelBooking(c fiber.Ctx) error {
 	})
 }
 
+// HandleGetBookings returns all bookings (Admin only)
+// @Summary      Get all bookings
+// @Description  Get a list of all bookings in the system
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {array}   types.Booking
+// @Router       /admin/booking [get]
 func (h *BookingHandler) HandleGetBookings(c fiber.Ctx) error {
 	booking, err := h.store.Booking.GetBookings(c.Context(), bson.M{})
 	if err != nil {
@@ -79,6 +108,16 @@ func (h *BookingHandler) HandleGetBookings(c fiber.Ctx) error {
 
 }
 
+// HandleGetBooking returns a specific booking
+// @Summary      Get booking details
+// @Description  Get a single booking by ID
+// @Tags         booking
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "Booking ID"
+// @Param        X-Api-Token header string true "Token"
+// @Success      200  {object}  types.Booking
+// @Router       /booking/{id} [get]
 func (h *BookingHandler) HandleGetBooking(c fiber.Ctx) error {
 	id := c.Params("id")
 	cacheKey := fmt.Sprintf("booking-%s", id)

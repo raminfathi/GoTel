@@ -35,15 +35,42 @@ func NewAuthHandler(userStore db.UserStore) *AuthHandler {
 	}
 }
 
+// HandleAuthenticate authenticates a user
+// @Summary      User Login
+// @Description  Login with email and password to get a JWT token
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body types.AuthParams true "Login Credentials"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Router       /auth [post]
 func (h *AuthHandler) HandleAuthenticate(c fiber.Ctx) error {
+	fmt.Println("\n🔥🔥🔥 HANDLER REACHED! 🔥🔥🔥")
+	rawBody := c.Body()
+	fmt.Printf("📦 Raw Body from Swagger: %s\n", string(rawBody))
 	var params types.AuthParams
 	if err := c.Bind().Body(&params); err != nil {
 		return types.ErrBadRequest()
 	}
+	fmt.Println("--- DEBUG LOGIN ---")
+	fmt.Printf("Input Params: %+v\n", params)
+	fmt.Printf("🔍 RECEIVED PARAMS: Email='%s' | Password='%s'\n", params.Email, params.Password)
+
+	fmt.Println("-------------------")
+
+	user, err := h.userStore.GetUserByEmail(c.Context(), params.Email)
+	if err != nil {
+		// احتمالا اینجا داره ارور میده
+		fmt.Println("DB Error:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	if errors := ValidateRequest(params); errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
-	user, err := h.userStore.GetUserByEmail(c.Context(), params.Email)
+	user, err = h.userStore.GetUserByEmail(c.Context(), params.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return invalidCredentials(c)

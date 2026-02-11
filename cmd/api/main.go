@@ -6,13 +6,17 @@ import (
 	"log"
 	"os"
 
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/adaptor"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/joho/godotenv"
 	"github.com/raminfathi/GoTel/api"
 	"github.com/raminfathi/GoTel/api/middleware"
 	"github.com/raminfathi/GoTel/db"
+	_ "github.com/raminfathi/GoTel/docs"
 	"github.com/redis/go-redis/v9"
+	httpSwagger "github.com/swaggo/http-swagger"
 
-	"github.com/gofiber/fiber/v3"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
@@ -20,6 +24,20 @@ import (
 var config = fiber.Config{
 	ErrorHandler: api.ErrorHandler,
 }
+
+// @title           GoTel API
+// @version         1.0
+// @description     This is the API documentation for Hotel Reservation System (GoTel).
+// @termsOfService  http://swagger.io/terms/
+// @contact.name   Ramin Fathi
+// @contact.email  support@gotel.com
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @host      localhost:5000
+// @BasePath  /api/v1
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name X-Api-Token
 
 func main() {
 	// 1. Init Dependencies
@@ -69,27 +87,24 @@ func main() {
 	// 4. Setup Fiber & Routes
 	app := fiber.New(config)
 
-	// authGroup
-	authGroup := app.Group("/api")
+	app.Use(cors.New())
 
-	v1 := app.Group("/api/v1")
+	app.Get("/swagger/*", adaptor.HTTPHandler(httpSwagger.WrapHandler))
 
-	apiv1 := v1.Group("/", middleware.JWTAuthentication(userStore))
-
-	admin := apiv1.Group("/admin", api.AdminAuth)
+	apiv1 := app.Group("/api/v1")
 
 	// ===========================
 	// 🔓 Public Routes
 	// ===========================
-	authGroup.Post("/auth", authHandler.HandleAuthenticate)
-	v1.Post("/user", userHandler.HandlePostUser)
+	apiv1.Post("/auth", authHandler.HandleAuthenticate)
+	apiv1.Post("/user", userHandler.HandlePostUser)
 
 	// ===========================
 	// 🔒 Private Routes
 	// ===========================
+	apiv1.Use(middleware.JWTAuthentication(userStore))
 
 	// User Handlers
-	apiv1.Get("/user", userHandler.HandleGetUsers)
 	apiv1.Get("/user/:id", userHandler.HandleGetUser)
 	apiv1.Put("/user/:id", userHandler.HandlePutUser)
 	apiv1.Delete("/user/:id", userHandler.HandleDeleteUser)
@@ -106,11 +121,14 @@ func main() {
 	// Booking Handlers
 	apiv1.Get("/booking", bookingHandler.HandleGetMyBookings)
 	apiv1.Get("/booking/:id", bookingHandler.HandleGetBooking)
-	apiv1.Get("/booking/:id/cancel", bookingHandler.HandleCancelBooking)
+	apiv1.Post("/booking/:id/cancel", bookingHandler.HandleCancelBooking)
 
 	// ===========================
 	// 👮 Admin Routes
 	// ===========================
+
+	admin := apiv1.Group("/admin", api.AdminAuth)
+	admin.Get("/user", userHandler.HandleGetUsers)
 	admin.Post("/hotel", hotelHandler.HandlePostHotel)
 	admin.Put("/hotel/:id", hotelHandler.HandlePutHotel)
 	admin.Post("/room", roomHandler.HandlePostRoom)

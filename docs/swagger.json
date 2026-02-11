@@ -1,0 +1,1048 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the API documentation for Hotel Reservation System (GoTel).",
+        "title": "GoTel API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Ramin Fathi",
+            "email": "support@gotel.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:5000",
+    "basePath": "/api/v1",
+    "paths": {
+        "/admin/booking": {
+            "get": {
+                "description": "Get a list of all bookings in the system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Get all bookings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.Booking"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/hotel": {
+            "post": {
+                "description": "Add a new hotel",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Add a hotel",
+                "parameters": [
+                    {
+                        "description": "Hotel Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.CreateHotelParams"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Hotel"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/hotel/{id}": {
+            "put": {
+                "description": "Update hotel details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Update a hotel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hotel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateHotelParams"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/room": {
+            "post": {
+                "description": "Add a new room to a hotel",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Add a room",
+                "parameters": [
+                    {
+                        "description": "Room Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.CreateRoomParams"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Room"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/user": {
+            "get": {
+                "description": "Get a list of all registered users (Admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Get all users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.User"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth": {
+            "post": {
+                "description": "Login with email and password to get a JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User Login",
+                "parameters": [
+                    {
+                        "description": "Login Credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.AuthParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/booking": {
+            "get": {
+                "description": "Get all bookings for the logged-in user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "booking"
+                ],
+                "summary": "Get my bookings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.Booking"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/booking/{id}": {
+            "get": {
+                "description": "Get a single booking by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "booking"
+                ],
+                "summary": "Get booking details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Booking ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Booking"
+                        }
+                    }
+                }
+            }
+        },
+        "/booking/{id}/cancel": {
+            "post": {
+                "description": "Cancel a booking (Method is POST/PUT for safety)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "booking"
+                ],
+                "summary": "Cancel booking",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Booking ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/hotel": {
+            "get": {
+                "description": "Get a list of all hotels with filtering options",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hotel"
+                ],
+                "summary": "Get all hotels",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.Hotel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/hotel/{id}": {
+            "get": {
+                "description": "Get detailed information of a specific hotel",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hotel"
+                ],
+                "summary": "Get hotel by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hotel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Hotel"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/hotel/{id}/rooms": {
+            "get": {
+                "description": "Get all rooms belonging to a specific hotel",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hotel"
+                ],
+                "summary": "Get hotel rooms",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hotel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.Room"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/room": {
+            "get": {
+                "description": "Get a list of all rooms",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "room"
+                ],
+                "summary": "Get all rooms",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.Room"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/room/{id}/book": {
+            "post": {
+                "description": "Book a specific room for a date range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "room"
+                ],
+                "summary": "Book a room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Booking Details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.BookRoomParams"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Booking"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "post": {
+                "description": "Create a new user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "User Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.CreateUserParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "description": "Get a user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.User"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update user details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateUserParams"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a user by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Delete a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "types.AuthParams": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.BookRoomParams": {
+            "type": "object",
+            "required": [
+                "fromDate",
+                "numPersons",
+                "tillDate"
+            ],
+            "properties": {
+                "fromDate": {
+                    "type": "string"
+                },
+                "numPersons": {
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 1
+                },
+                "tillDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.Booking": {
+            "type": "object",
+            "properties": {
+                "canceled": {
+                    "type": "boolean"
+                },
+                "fromDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "numPersons": {
+                    "type": "integer"
+                },
+                "roomID": {
+                    "type": "string"
+                },
+                "tillDate": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.CreateHotelParams": {
+            "type": "object",
+            "required": [
+                "location",
+                "name"
+            ],
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                }
+            }
+        },
+        "types.CreateRoomParams": {
+            "type": "object",
+            "required": [
+                "basePrice",
+                "hotelId",
+                "type"
+            ],
+            "properties": {
+                "basePrice": {
+                    "type": "number",
+                    "minimum": 10
+                },
+                "hotelId": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "minLength": 2
+                }
+            }
+        },
+        "types.CreateUserParams": {
+            "type": "object",
+            "required": [
+                "email",
+                "firstName",
+                "lastName",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2
+                },
+                "lastName": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 7
+                }
+            }
+        },
+        "types.Hotel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer"
+                },
+                "rooms": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "types.Room": {
+            "type": "object",
+            "properties": {
+                "basePrice": {
+                    "type": "number"
+                },
+                "hotelId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "type": {
+                    "$ref": "#/definitions/types.RoomType"
+                }
+            }
+        },
+        "types.RoomType": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-varnames": [
+                "Single",
+                "Double",
+                "SeaView",
+                "KingSuite"
+            ]
+        },
+        "types.UpdateHotelParams": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                },
+                "name": {
+                    "description": "omitempty یعنی اگر نفرستاد گیر نده",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                }
+            }
+        },
+        "types.UpdateUserParams": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isAdmin": {
+                    "type": "boolean"
+                },
+                "lastName": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "X-Api-Token",
+            "in": "header"
+        }
+    }
+}
