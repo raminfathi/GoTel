@@ -1,8 +1,11 @@
 version: '3'
+
 dotenv: ['.env']
+
 vars:
   BINARY_NAME: api
-  DEFAULT_PORT: 3000
+  EXT: '{{if eq OS "windows"}}.exe{{end}}'
+
 tasks:
   default:
     cmds:
@@ -11,17 +14,14 @@ tasks:
   build:
     desc: Build the application
     cmds:
-      - go build -o bin/{{.BINARY_NAME}}{{exeExt}} cmd/api/main.go
-    vars:
-      exeExt: '{{if eq OS "windows"}}.exe{{end}}'
+      - go build -o bin/{{.BINARY_NAME}}{{.EXT}} cmd/api/main.go
 
   run:
     desc: Run the application
-    deps: [build] 
+    deps: [build]
     cmds:
-      - ./bin/{{.BINARY_NAME}}{{exeExt}}
-    vars:
-      exeExt: '{{if eq OS "windows"}}.exe{{end}}'
+
+      - ./bin/{{.BINARY_NAME}}{{.EXT}}
 
   seed:
     desc: Seed the database
@@ -32,19 +32,18 @@ tasks:
     desc: Run all tests
     cmds:
       - go test -v ./...
+
   clean:
     desc: Clean binary files
     cmds:
-      - rm -rf bin
+      - cmd: rm -rf bin
+        platforms: [linux, darwin] 
+      
       - cmd: powershell Remove-Item -Recurse -Force bin
-        platforms: [windows]
-docker:
-    desc: Build and run with Docker
-    cmds:
-      - echo "Building Docker image..."
-      - docker build -t gotel-api .
-      - echo "Running Docker container on port {{.HTTP_PORT}}..."
-      - docker run -p {{.HTTP_PORT}}:{{.HTTP_PORT}} gotel-api
-    vars:
-      HTTP_PORT: '{{default .DEFAULT_PORT .HTTP_LISTEN_ADDRESS | replace ":" ""}}'
+        platforms: [windows]     
+        ignore_error: true
 
+  docker:
+      desc: Build and run with Docker Compose
+      cmds:
+        - docker compose up --build
